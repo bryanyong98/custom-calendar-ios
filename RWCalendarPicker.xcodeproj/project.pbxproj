@@ -13,6 +13,7 @@
 		185CB1FC23C78CE6009F7571 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 185CB1FB23C78CE6009F7571 /* AppDelegate.swift */; };
 		185CB1FE23C78CE6009F7571 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 185CB1FD23C78CE6009F7571 /* SceneDelegate.swift */; };
 		185CB20523C78CE8009F7571 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 185CB20423C78CE8009F7571 /* Assets.xcassets */; };
+		4E7440F42A7F86E700038083 /* Days.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E7440F32A7F86E700038083 /* Days.swift */; };
 		B0071980248EC3D7007B667E /* CalendarPickerFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007197E248EC3D7007B667E /* CalendarPickerFooterView.swift */; };
 		B0071981248EC3D7007B667E /* CalendarPickerHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007197F248EC3D7007B667E /* CalendarPickerHeaderView.swift */; };
 		B0071983248EC3EB007B667E /* ItemDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0071982248EC3EB007B667E /* ItemDetailViewController.swift */; };
@@ -32,6 +33,7 @@
 		185CB1FD23C78CE6009F7571 /* SceneDelegate.swift */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; tabWidth = 2; };
 		185CB20423C78CE8009F7571 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		185CB20923C78CE8009F7571 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4E7440F32A7F86E700038083 /* Days.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Days.swift; sourceTree = "<group>"; };
 		B007197E248EC3D7007B667E /* CalendarPickerFooterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalendarPickerFooterView.swift; sourceTree = "<group>"; };
 		B007197F248EC3D7007B667E /* CalendarPickerHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalendarPickerHeaderView.swift; sourceTree = "<group>"; };
 		B0071982248EC3EB007B667E /* ItemDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemDetailViewController.swift; sourceTree = "<group>"; };
@@ -59,6 +61,7 @@
 			children = (
 				1289631F24915F920071400E /* MonthMetadata.swift */,
 				B043265B24562FCC00D5239A /* ChecklistItem.swift */,
+				4E7440F32A7F86E700038083 /* Days.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -216,6 +219,7 @@
 				B0071986248EC3F1007B667E /* ItemListViewController.swift in Sources */,
 				B0071983248EC3EB007B667E /* ItemDetailViewController.swift in Sources */,
 				B043265C24562FCC00D5239A /* ChecklistItem.swift in Sources */,
+				4E7440F42A7F86E700038083 /* Days.swift in Sources */,
 				B0071981248EC3D7007B667E /* CalendarPickerHeaderView.swift in Sources */,
 				B04326642456399600D5239A /* CalendarPickerViewController.swift in Sources */,
 				185CB1FE23C78CE6009F7571 /* SceneDelegate.swift in Sources */,

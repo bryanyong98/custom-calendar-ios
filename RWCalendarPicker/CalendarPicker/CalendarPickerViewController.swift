@@ -41,11 +41,24 @@ class CalendarPickerViewController: UIViewController {
     return view
   }()
 
+  private lazy var collectionView: UICollectionView = {
+    let layout = UICollectionViewFlowLayout()
+    layout.minimumLineSpacing = 0
+    layout.minimumInteritemSpacing = 0
+
+    let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+    collectionView.isScrollEnabled = false
+    collectionView.translatesAutoresizingMaskIntoConstraints = false
+    return collectionView
+  }()
+
   // MARK: Calendar Data Values
 
   private let selectedDate: Date
 
   private let selectedDateChanged: ((Date) -> Void)
+
+  private let calendar = Calendar(identifier: .gregorian)
 
   private lazy var dateFormatter: DateFormatter = {
     let dateFormatter = DateFormatter()
@@ -74,14 +87,115 @@ class CalendarPickerViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+  
+    collectionView.backgroundColor = .systemGroupedBackground
 
     view.addSubview(dimmedBackgroundView)
+    view.addSubview(collectionView)
 
     NSLayoutConstraint.activate([
       dimmedBackgroundView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
       dimmedBackgroundView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
       dimmedBackgroundView.topAnchor.constraint(equalTo: view.topAnchor),
-      dimmedBackgroundView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+      dimmedBackgroundView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+      collectionView.leadingAnchor.constraint(
+        equalTo: view.readableContentGuide.leadingAnchor),
+      collectionView.trailingAnchor.constraint(
+        equalTo: view.readableContentGuide.trailingAnchor),
+
+      collectionView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 10),
+      collectionView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5)
     ])
+  }
+}
+
+private extension CalendarPickerViewController {
+
+  func monthMetadata(for baseDate: Date) -> MonthMetadata? {
+
+      guard let numberOfDaysInMonth = calendar.range(of: .day, in: .month, for: baseDate)?.count,
+            let firstDayOfMonth = calendar.date(
+              from: calendar.dateComponents([.year, .month], from: baseDate))
+      else { return nil }
+
+      let firstDayWeekday = calendar.component(.weekday, from: firstDayOfMonth)
+
+      return MonthMetadata(
+        numberOfDays: numberOfDaysInMonth,
+        firstDay: firstDayOfMonth,
+        firstDayWeekday: firstDayWeekday
+      )
+  }
+
+  func generateDaysInMonth(for baseDate: Date) -> [Day] {
+
+    guard let metadata = monthMetadata(for: baseDate) else { return [] }
+    
+    let numberOfDaysInMonth = metadata.numberOfDays
+    let offsetInInitialRow = metadata.firstDayWeekday
+    let firstDayOfMonth = metadata.firstDay
+
+    print("receive offsetInInitialRow: \(offsetInInitialRow)")
+    print("receive firstDayOfMonth: \(offsetInInitialRow)")
+
+    var days: [Day] = (1..<(numberOfDaysInMonth + offsetInInitialRow))
+      .map { day in
+
+        // Check current day in loop is within current month or part of previous
+        let isWithinDisplayedMonth = day >= offsetInInitialRow
+
+        // Calculate the offset that day is from the first day of month.
+        // Value will be negative if the day is from previous month
+        let dayOffset = isWithinDisplayedMonth ? day - offsetInInitialRow : -(offsetInInitialRow - day)
+
+        return generateDay(offsetBy: dayOffset, for: firstDayOfMonth, isWithinDisplayedMonth: isWithinDisplayedMonth)
+      }
+
+    // append the days of the last row, inclusive of days in next month (if any)
+    days += generateStartOfNextMonth(using: firstDayOfMonth)
+
+    return days
+  }
+
+  func generateDay(
+    offsetBy dayOffset: Int,
+    for baseDate: Date,
+    isWithinDisplayedMonth: Bool
+  ) -> Day {
+    let date = calendar.date(byAdding: .day, value: dayOffset, to: baseDate) ?? baseDate
+
+    return Day(
+      date: date,
+      number: dateFormatter.string(from: date),
+      isSelected: calendar.isDate(date, inSameDayAs: selectedDate),
+      isWithinDisplayedMonth: isWithinDisplayedMonth
+    )
+  }
+
+  func generateStartOfNextMonth(
+    using firstDayOfDisplayedMonth: Date
+  ) -> [Day] {
+
+    // retrieve the last day of the displayed month. Return empty array if fails
+    guard let lastDayInMonth = calendar.date(
+      byAdding: DateComponents(month: 1, day: -1),
+      to: firstDayOfDisplayedMonth)
+    else {
+      return []
+    }
+
+    // calculate the number of extra days needed to fill in last row of calendar month.
+    // e.g if last day of month is Sat, result is zero -> return an empty array
+    let additionalDays = 7 - calendar.component(.weekday, from: lastDayInMonth)
+    guard additionalDays > 0 else { return [] }
+
+    // add additional days in the loop to lastDayInMonth to generate days at beginning of the next month
+    let days: [Day] = (1...additionalDays)
+      .map { additionalDays in
+        generateDay(offsetBy: additionalDays, for: lastDayInMonth, isWithinDisplayedMonth: false)
+      }
+    
+    return days
   }
 }
