@@ -56,6 +56,22 @@ class CalendarPickerViewController: UIViewController {
 
   private let selectedDate: Date
 
+  // when base date changes, new month data will be regenerated, collection view will be reloaded
+  private var baseDate: Date {
+    didSet {
+      days = generateDaysInMonth(for: baseDate)
+      collectionView.reloadData()
+    }
+  }
+
+  // hold the month's data for the base date
+  private lazy var days = generateDaysInMonth(for: baseDate)
+
+  // number of weeks in the currently displayed month
+  private var numberOfWeeksInBaseDate: Int {
+    calendar.range(of: .weekOfMonth, in: .month, for: baseDate)?.count ?? 0
+  }
+
   private let selectedDateChanged: ((Date) -> Void)
 
   private let calendar = Calendar(identifier: .gregorian)
@@ -70,6 +86,7 @@ class CalendarPickerViewController: UIViewController {
 
   init(baseDate: Date, selectedDateChanged: @escaping ((Date) -> Void)) {
     self.selectedDate = baseDate
+    self.baseDate = baseDate
     self.selectedDateChanged = selectedDateChanged
 
     super.init(nibName: nil, bundle: nil)
@@ -107,6 +124,52 @@ class CalendarPickerViewController: UIViewController {
       collectionView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 10),
       collectionView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5)
     ])
+
+    collectionView.register(CalendarDateCollectionViewCell.self, forCellWithReuseIdentifier: CalendarDateCollectionViewCell.reuseIdentifier)
+
+    collectionView.dataSource = self
+    collectionView.delegate = self
+  }
+
+  // Allow collection view to recalculate its layout when device rotates / enter
+  // split view on an iPad
+  override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+    super.viewWillTransition(to: size, with: coordinator)
+    collectionView.reloadData()
+  }
+}
+
+// MARK: - UICollectionViewDataSource
+extension CalendarPickerViewController: UICollectionViewDataSource {
+  
+  func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    days.count
+  }
+
+  func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    let day = days[indexPath.row]
+
+    let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CalendarDateCollectionViewCell.reuseIdentifier, for: indexPath) as! CalendarDateCollectionViewCell
+
+    cell.day = day
+    return cell
+  }
+}
+
+// MARK: - UICollectionViewDelegateFlowLayout
+extension CalendarPickerViewController: UICollectionViewDelegateFlowLayout {
+
+  func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    let day = days[indexPath.row]
+    selectedDateChanged(day.date)
+    dismiss(animated: true)
+  }
+
+  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    let width = Int(collectionView.frame.width / 7)
+    let height = Int(collectionView.frame.height) / numberOfWeeksInBaseDate
+
+    return CGSize(width: width, height: height)
   }
 }
 
