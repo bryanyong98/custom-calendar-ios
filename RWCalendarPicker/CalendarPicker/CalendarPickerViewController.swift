@@ -52,6 +52,23 @@ class CalendarPickerViewController: UIViewController {
     return collectionView
   }()
 
+  private lazy var headerView = CalendarPickerHeaderView { [weak self] in
+    guard let self = self else { return }
+    self.dismiss(animated: true)
+  }
+
+  private lazy var footerView = CalendarPickerFooterView(
+    didTapLastMonthCompletionHandler: { [weak self] in
+      guard let self = self else { return }
+
+      self.baseDate = self.calendar.date(byAdding: .month, value: -1, to: self.baseDate) ?? baseDate
+
+    }, didTapNextMonthCompletionHandler: { [weak self] in
+      guard let self = self else { return }
+
+      self.baseDate = self.calendar.date(byAdding: .month, value: 1, to: self.baseDate) ?? baseDate
+    })
+
   // MARK: Calendar Data Values
 
   private let selectedDate: Date
@@ -61,6 +78,7 @@ class CalendarPickerViewController: UIViewController {
     didSet {
       days = generateDaysInMonth(for: baseDate)
       collectionView.reloadData()
+      headerView.baseDate = baseDate
     }
   }
 
@@ -109,6 +127,8 @@ class CalendarPickerViewController: UIViewController {
 
     view.addSubview(dimmedBackgroundView)
     view.addSubview(collectionView)
+    view.addSubview(headerView)
+    view.addSubview(footerView)
 
     NSLayoutConstraint.activate([
       dimmedBackgroundView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -122,13 +142,25 @@ class CalendarPickerViewController: UIViewController {
         equalTo: view.readableContentGuide.trailingAnchor),
 
       collectionView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 10),
-      collectionView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5)
+      collectionView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5),
+
+      headerView.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor),
+      headerView.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor),
+      headerView.bottomAnchor.constraint(equalTo: collectionView.topAnchor),
+      headerView.heightAnchor.constraint(equalToConstant: 85),
+
+      footerView.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor),
+      footerView.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor),
+      footerView.topAnchor.constraint(equalTo: collectionView.bottomAnchor),
+      footerView.heightAnchor.constraint(equalToConstant: 60)
     ])
 
     collectionView.register(CalendarDateCollectionViewCell.self, forCellWithReuseIdentifier: CalendarDateCollectionViewCell.reuseIdentifier)
 
     collectionView.dataSource = self
     collectionView.delegate = self
+
+    headerView.baseDate = baseDate
   }
 
   // Allow collection view to recalculate its layout when device rotates / enter
